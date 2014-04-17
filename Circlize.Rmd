@@ -1,0 +1,104 @@
+Visualizing Surgical Complications
+========================================================
+
+The ACS NSQIP database is an interhospital dataset that keeps track of outcomes for surgical patients.
+
+```{r}
+setwd('C:/Users/sdperez.EMORYUNIVAD/Documents/GitHub/CirclizeComplications')
+library(xlsx)
+Comps<-read.xlsx2('Complications.xls',1,stringsAsFactors=FALSE)
+names(Comps)
+sum(as.numeric(Comps$COUNT))#total General Surgery patients in set
+
+
+#Let's count the number of complications of each type
+x<-list()
+for (i in 1:21) {
+x[[i]]<-min(by(as.numeric(Comps$COUNT),Comps[,i],FUN=sum))
+}
+Comp.Tab<-data.frame(Complication=names(Comps)[1:21],Count=unlist(x))
+sum(Comp.Tab$Count)#number 
+
+
+CompPlot<-Comp.Tab[-c(13,14,18),]
+CompPlot$Complication<-factor(CompPlot$Complication)
+```
+
+Plot a 'circos' plot of the complications
+
+```{r fig.width=7, fig.height=6}
+library(circlize)
+library(RColorBrewer)
+display.brewer.pal(21, 'Purples')
+
+col <- brewer.pal(9, 'PuBu')
+colp <- brewer.pal(9, 'Purples')
+col[3]<-"#3F007D"
+col[4]<-"#6A51A3"
+
+col2<-rep(col[3:9],3)
+
+circos.clear()
+circos.par(cell.padding=c(0,0,0,0),gap.degree=1)
+circos.initialize(CompPlot$Complication, xlim = c(0, 1),
+                  sector.width =c(CompPlot$Count))
+circos.trackPlotRegion(ylim = c(0, 1), track.height = .2,
+                       bg.col = col2, 
+                       bg.border = NA)
+circos.trackText(CompPlot$Complication,
+                 x=rep(.5,18), y=rep(2.2,18), 
+                 labels='label',
+                  direction = "arc")
+circos.axis('bottom',sector.index='ORGSPCSSI')
+circos.clear()
+
+
+circos.clear()
+circos.par(cell.padding=c(0,0,0,0),gap.degree=1,track.margin=c(.1,.1))
+circos.initialize(CompPlot$Complication, xlim = c(0, 1),
+                  sector.width =c(CompPlot$Count))
+circos.trackPlotRegion(ylim = c(0, 5),factors=factor(CompPlot$Complication),
+                       track.height = .2,
+                       bg.col = col2, 
+                       bg.border = NA,
+                       panel.fun=function(x,y){
+                         i = get.cell.meta.data("sector.numeric.index")
+                         name = get.cell.meta.data("sector.index")
+                         xlim = get.cell.meta.data("xlim")
+                        if (i %in% 5:15) dir="vertical_left"  else dir="vertical_right"
+                         circos.text(x=.5, y=8, labels=name, 
+                                     direction =dir,cex=.5)
+                       })
+
+
+
+
+```
+Create file with information about links
+
+```{r}
+#Create a blank data frame for data
+links1<-data.frame(Comp1=vector('character',441),Comp2=vector('character',441),Count=numeric(441),
+                   stringsAsFactors=F)
+#The 'Comps' data set includes all possible combination of complications.
+#The following calculates for each *2-WAY COMBINATION* of complications the total occurrences
+for (i in 1:21){
+  for (j in 1:21){
+    index<-Comps[,i]!='No Complication' & Comps[,j]!='No Complication'
+    Comps2<-Comps[index,]
+    n=21*(i-1)+j
+    links1$Count[n]<-sum(as.numeric(Comps2$COUNT))
+    links1$Comp1[n]<-names(Comps2)[i]
+    links1$Comp2[n]<-names(Comps2)[j]
+    }
+  }
+```
+
+Now create the links between the segments.
+```{r}
+circos.link(links1$Comp1[1], c(0,1), links1$Comp2[2],c(0,.2))
+
+links1\$Comp2[2]
+
+Comp2[2]
+links1\$Comp2
