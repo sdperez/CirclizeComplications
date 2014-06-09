@@ -1,13 +1,17 @@
-Visualizing Surgical Complications
+---
+layout: post
+title: "Visualizing Surgical Complications with Chord Diagrams"
+---
 ========================================================
 
-The ACS NSQIP database is an interhospital dataset that keeps track of outcomes for surgical patients.
+Circular chord diagrams are commonly used to show the strength of association or link between various variables. For exxample they have been used in genetics to show the strength of correlation between genes. Because many genes are associated with many others, the circular layout is a more compact visualization than a correlation matrix for example. 
+Here we use the diagrams to show with complications often occurr in tandem in patients after surgery. The data comes from general surgery patients in the 2012  ACS NSQIP database.
 
 Code
 =======
 Data Preparation
 -------------------
-Setting up the data in the correct way is essential before plotting. We need to main data sets. The first is a data set showing each complication and the frequency of that complication. This will be used to create the outer circle of the plot and to designate the size of each of the segments
+Setting up the data in the correct way is essential before plotting. We need two main data sets. The first is a data set showing each complication and the frequency of that complication. This will be used to create the outer circle of the plot and to designate the size of each of the segments
 ###Frequency by complication
 ```{r ,warning=FALSE, message=FALSE}
 setwd('C:/Users/sdperez.EMORYUNIVAD/Documents/GitHub/CirclizeComplications')
@@ -37,7 +41,7 @@ CompPlot$labls<-c("Superficial SSI","Deep SSI","Organ Space SSI","Wound Dehis",
 ```
 ###Frequency by Combination of Complications
 The second dataset will describe what is the frequency of patients that have each of the two way combinations of complications. In other words, how many patients had a heart attach AND a superficial site infection? This dataset will be used to create the links between the segments of the outer circle.
-Create file with information about links
+
 
 ```{r ,warning=FALSE, message=FALSE}
 #Create a blank data frame for data
@@ -83,19 +87,9 @@ The first step is to set some options and plot the outer circle. The size of the
 ```{r fig.width=9, fig.height=9 ,warning=FALSE, message=FALSE}
  op <- par(no.readonly = TRUE)
 library(circlize)
-#library(RColorBrewer)
-#display.brewer.pal(21, 'Purples')
-#display.brewer.pal(21, 'PuBu')
 
-#col <- brewer.pal(9, 'PuBu')
-#colp <- brewer.pal(9, 'Purples')
-#col[3]<-"#3F007D"
-#col[4]<-"#6A51A3"
-
-#col2<-rep(col[3:9],3)
 colfunc <- colorRampPalette(c("red","yellow","green","blue"))
-#levels(CompPlot$Complication)
-#cbind(CompPlot$Complication,CompPlot$Count)
+
 ord<-order(CompPlot$Complication)
 
 par(mar = c(1, 1, 1, 1))
